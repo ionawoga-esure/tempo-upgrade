@@ -1,0 +1,75 @@
+search_enabled: true
+
+usage_report:
+  reporting_enabled: false
+
+storage:
+  trace:
+    backend: s3
+    wal:
+      backend: local
+    s3:
+      endpoint: tempo-minio:9000  # Changed from minio:9000
+      insecure: true
+      bucket: tempo-traces
+      access_key: grafana-tempo   # Match this to MinIO's rootUser below
+      secret_key: supersecret
+
+minio:
+  enabled: true
+  mode: standalone  # Default, but explicit for clarity
+  rootUser: grafana-tempo  # Override to match access_key above
+  rootPassword: supersecret  # Matches secret_key
+  defaultBuckets: tempo-traces  # Auto-create the bucket on startup
+
+traces:
+  otlp:
+#    protocols:
+    grpc:
+      enabled: true
+      endpoint: 0.0.0.0:4317
+    http:
+      enabled: true
+      endpoint: 0.0.0.0:4318
+
+# tempo:
+#   service:
+#     ports:
+#       otlp-grpc: 4317  # Adds 4317 to all relevant services (distributor, ingester, etc.)
+#       otlp-http: 4318  # Adds 4318 (if enabling HTTP)
+
+server:
+  grpc_server_max_recv_msg_size: 16777216
+  grpc_server_max_send_msg_size: 16777216
+  http_listen_port: 3200
+  http_server_read_timeout: 2m
+  http_server_write_timeout: 2m
+  log_format: logfmt
+  log_level: info
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          #endpoint: 0.0.0.0:4317
+          enabled: true
+        http:
+          #endpoint: 0.0.0.0:4318
+          enabled: true
+
+ingester:
+  flush_check_period: 10s
+  lifecycler:
+    ring:
+      kvstore:
+        store: memberlist inmemory
+      replication_factor: 1
+    tokens_file_path: /var/tempo/tokens.json
+  trace_idle_period: 10s
+memberlist:
+  abort_if_cluster_join_fails: false
+  join_members:
+  - tracing-tempo-distributed-gossip-ring
+# metrics_generator_enabled: false.        Removed because it doesn't exist in 2.8??
+multitenancy_enabled: false

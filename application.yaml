@@ -8,11 +8,11 @@ spec:
 
   source:
     repoURL: https://grafana.github.io/helm-charts
-    chart: tempo-distributed        # The same chart name you used
-    targetRevision: 1.48.1          # Pin chart version
+    chart: tempo-distributed
+    targetRevision: 1.48.1        
     helm:
       valueFiles:
-        - values-tempo2.yaml       #The same values file used locally
+        - values-tempo.yaml   
 
   destination:
     server: https://kubernetes.default.svc
@@ -20,5 +20,5 @@ spec:
 
   syncPolicy:
     automated:
-      prune: true                   # deletes resources removed from Helm chart
-      selfHeal: true                # restores out-of-sync resources
+      prune: true            
+      selfHeal: true                

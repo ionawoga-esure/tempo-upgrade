@@ -5,14 +5,13 @@ namespace: tempo
 
 helmCharts:
   - name: tempo-distributed
-    repo: https://grafana.github.io/helm-charts
-    version: 1.48.1
-    releaseName: tempo
+    path: tempo-chart
     valuesInline:
       replicaCount: 3
       storage:
         enabled: true
         size: 10Gi
+
 
 resources:
   - tempo-datasource.yaml

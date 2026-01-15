@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: tempo
+
+helmCharts:
+  - name: tempo-distributed
+    repo: https://grafana.github.io/helm-charts
+    version: 1.48.1
+    releaseName: tempo
+    valuesInline:
+      replicaCount: 3
+      storage:
+        enabled: true
+        size: 10Gi
+
+resources:
+  - tempo-datasource.yaml

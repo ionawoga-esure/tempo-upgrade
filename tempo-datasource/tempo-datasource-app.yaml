@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/ionawoga-esure/tempo-upgrade.git
     targetRevision: main
-    path: tempo/tempo-datasource      # folder containing tempo-datasource.yaml
+    path: tempo-datasource      # folder containing tempo-datasource.yaml
 
   destination:
     server: https://kubernetes.default.svc

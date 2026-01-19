@@ -12,10 +12,81 @@ spec:
     targetRevision: 1.48.1
     helm:
       values: |
-        replicaCount: 3
+        search_enabled: true
+
+        usage_report:
+          reporting_enabled: false
+
         storage:
+          trace:
+            backend: s3
+            wal:
+              backend: local
+            s3:
+              endpoint: tempo-minio:9000
+              insecure: true
+              bucket: tempo-traces
+              access_key: grafana-tempo
+              secret_key: supersecret
+
+        minio:
           enabled: true
-          size: 10Gi
+          mode: standalone
+          rootUser: grafana-tempo
+          rootPassword: supersecret
+          defaultBuckets: tempo-traces
+
+        traces:
+          otlp:
+            grpc:
+              enabled: true
+              endpoint: 0.0.0.0:4317
+            http:
+              enabled: true
+              endpoint: 0.0.0.0:4318
+
+        server:
+          grpc_server_max_recv_msg_size: 16777216
+          grpc_server_max_send_msg_size: 16777216
+          http_listen_port: 3200
+          http_server_read_timeout: 2m
+          http_server_write_timeout: 2m
+          log_format: logfmt
+          log_level: info
+
+        distributor:
+          receivers:
+            otlp:
+              protocols:
+                grpc:
+                  enabled: true
+                http:
+                  enabled: true
+
+        ingester:
+          flush_check_period: 10s
+          lifecycler:
+            ring:
+              kvstore:
+                store: memberlist
+              replication_factor: 1
+            tokens_file_path: /var/tempo/tokens.json
+          trace_idle_period: 10s
+
+        memberlist:
+          abort_if_cluster_join_fails: false
+          join_members:
+            - tracing-tempo-distributed-gossip-ring
+
+        multitenancy_enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tracing
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
   destination:
     server: https://kubernetes.default.svc
     namespace: tempo
